@@ -5,6 +5,8 @@
 Open `index.html` in any modern browser — no server, no account, no API key. All data are bundled in the five `*_data.js` files; live feeds are checked directly from your browser and the interface shows an explicit "unavailable" state rather than a fabricated value when a feed is blocked.
 
 **Live site:** https://asia-green-corridors.netlify.app/
+**Repository:** https://github.com/drngkwphilip/asia-green-corridors
+**Archive:** [![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.23920029.svg)](https://doi.org/10.5281/zenodo.23920029) — concept DOI `10.5281/zenodo.23920029` always resolves to the latest archived version.
 
 ## What it does
 
@@ -29,6 +31,7 @@ Open `index.html` in any modern browser — no server, no account, no API key. A
 | `crosscheck_detectors.py` | Independent Python re-implementation of the browser's JS detectors (results identical) |
 | `validation/results.json` | Full event-level validation output |
 | `validation/port_series.json` | Daily traffic series for the 283 monitored ports (~20 MB; the raw evidence) |
+| `ct_api_raw_sample.json` | Archived raw Climate TRACE API response with HTTP headers (accessed 5 September 2026) |
 
 ## Reproduce the validation
 
