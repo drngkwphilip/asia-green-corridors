@@ -1,0 +1,140 @@
+{
+  "archived": "2026-09-06",
+  "request_url": "https://api.climatetrace.org/v7/sources?sectors=transportation&limit=5",
+  "http_status": 200,
+  "response_headers": {
+    "Content-Type": "application/json; charset=utf-8",
+    "Transfer-Encoding": "chunked",
+    "Connection": "close",
+    "Access-Control-Allow-Origin": "*",
+    "Access-Control-Expose-Headers": "Content-Disposition",
+    "Date": "Sat, 05 Sep 2026 18:30:22 GMT",
+    "X-Cache": "Miss from cloudfront",
+    "Via": "1.1 f776d4120cbaceb1b2bdfce643d142ca.cloudfront.net (CloudFront)",
+    "X-Amz-Cf-Pop": "NRT57-P11",
+    "X-Amz-Cf-Id": "xERPxjgrB68YZVXERYwgwNdaH5rTCpcir7wCEJFoOJboyDNtLIlnTg=="
+  },
+  "note": "Raw Climate TRACE API v7 sample response, archived to document gas field (co2e_100yr) and year coverage for the Asia Green Corridors preprint.",
+  "body_first_records": [
+    {
+      "id": 3645972,
+      "name": "Los Angeles County",
+      "sector": "transportation",
+      "subsector": "road-transportation",
+      "country": "USA",
+      "assetType": "",
+      "sourceType": "gadm-aggregation",
+      "centroid": {
+        "longitude": -118.14520630888786,
+        "latitude": 34.253569000000084,
+        "srid": 4326
+      },
+      "gas": "co2e_100yr",
+      "emissionsQuantity": 38431290.46057425,
+      "emissionsFactor": 0.0003171330136724351,
+      "emissionsFactorUnits": "t of CO2e_100yr per Vehicle*km ",
+      "activity": 121183505985.50333,
+      "activityUnits": "Vehicle*km ",
+      "capacity": 77443.4558604279,
+      "capacityUnits": "km",
+      "capacityFactor": 1564799.822517034,
+      "year": 2025
+    },
+    {
+      "id": 3644601,
+      "name": "Maricopa County",
+      "sector": "transportation",
+      "subsector": "road-transportation",
+      "country": "USA",
+      "assetType": "",
+      "sourceType": "gadm-aggregation",
+      "centroid": {
+        "longitude": -112.76466143987253,
+        "latitude": 33.275846482000105,
+        "srid": 4326
+      },
+      "gas": "co2e_100yr",
+      "emissionsQuantity": 24545184.175527304,
+      "emissionsFactor": 0.00033386648853153976,
+      "emissionsFactorUnits": "t of CO2e_100yr per Vehicle*km ",
+      "activity": 73517963074.05847,
+      "activityUnits": "Vehicle*km ",
+      "capacity": 68667.54029207684,
+      "capacityUnits": "km",
+      "capacityFactor": 1070636.326295516,
+      "year": 2025
+    },
+    {
+      "id": 3645440,
+      "name": "Harris County",
+      "sector": "transportation",
+      "subsector": "road-transportation",
+      "country": "USA",
+      "assetType": "",
+      "sourceType": "gadm-aggregation",
+      "centroid": {
+        "longitude": -95.39074195075592,
+        "latitude": 29.83457600000017,
+        "srid": 4326
+      },
+      "gas": "co2e_100yr",
+      "emissionsQuantity": 24105455.782196723,
+      "emissionsFactor": 0.0003266321662442783,
+      "emissionsFactorUnits": "t of CO2e_100yr per Vehicle*km ",
+      "activity": 73800005857.87067,
+      "activityUnits": "Vehicle*km ",
+      "capacity": 53241.21797483699,
+      "capacityUnits": "km",
+      "capacityFactor": 1386144.2067826139,
+      "year": 2025
+    },
+    {
+      "id": 2801126,
+      "name": "Singapore",
+      "sector": "transportation",
+      "subsector": "international-shipping",
+      "country": "SGP",
+      "assetType": "",
+      "sourceType": "point-source",
+      "centroid": {
+        "longitude": 103.76292785862566,
+        "latitude": 1.2783665838769727,
+        "srid": 4326
+      },
+      "gas": "co2e_100yr",
+      "emissionsQuantity": 21578523.594360434,
+      "emissionsFactor": 0.46070204276305166,
+      "emissionsFactorUnits": "t of CO2e_100yr per Nautical miles (nmi)",
+      "activity": 46838350.15131179,
+      "activityUnits": "Nautical miles (nmi)",
+      "capacity": 99226,
+      "capacityUnits": "voyages and stays",
+      "capacityFactor": 472.0370684227097,
+      "year": 2025
+    },
+    {
+      "id": 3166444,
+      "name": "Dubai International Airport",
+      "sector": "transportation",
+      "subsector": "international-aviation",
+      "country": "ARE",
+      "assetType": "international",
+      "sourceType": "point-source",
+      "centroid": {
+        "longitude": 55.370992,
+        "latitude": 25.24979,
+        "srid": 4326
+      },
+      "gas": "co2e_100yr",
+      "emissionsQuantity": 21332594.78531907,
+      "emissionsFactor": 3.18484787,
+      "emissionsFactorUnits": "t of CO2e_100yr per t of fuel",
+      "activity": 6698151.891731981,
+      "activityUnits": "t of fuel",
+      "capacity": 449915,
+      "capacityUnits": "flights",
+      "capacityFactor": 14.887594082731141,
+      "year": 2025
+    }
+  ]
+}
