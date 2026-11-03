@@ -1,0 +1,914 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Asia Green Corridors — Port &amp; Shipping Decarbonisation Observatory</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/leaflet@1.9.4/dist/leaflet.css">
+<script src="https://cdn.jsdelivr.net/npm/leaflet@1.9.4/dist/leaflet.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.3/dist/chart.umd.min.js"></script>
+<style>
+  :root { --navy:#0b3b5e; --ink:#0f172a; --mut:#64748b; --line:#e2e8f0; --bg:#f8fafc;
+          --ok:#15803d; --warn:#b45309; --bad:#b91c1c; }
+  * { box-sizing:border-box; }
+  body { margin:0; font-family:Georgia,'Times New Roman',serif; background:var(--bg); color:var(--ink); }
+  header { background:var(--navy); color:#fff; padding:16px 24px 0; }
+  header h1 { margin:0; font-size:21px; }
+  header .sub { font-size:13px; opacity:.9; margin:4px 0 12px; max-width:960px; line-height:1.45; }
+  nav { display:flex; gap:4px; }
+  nav button { background:transparent; color:#cbd5e1; border:0; border-bottom:3px solid transparent;
+               padding:9px 16px; font-size:14.5px; cursor:pointer; font-family:inherit; }
+  nav button.active { color:#fff; border-bottom-color:#fbbf24; }
+  main { max-width:1160px; margin:0 auto; padding:18px 16px 70px; }
+  .tab { display:none; } .tab.active { display:block; }
+  .card { background:#fff; border:1px solid var(--line); border-radius:8px; padding:14px 18px; margin-bottom:14px; }
+  .card h2 { margin:0 0 6px; font-size:16.5px; color:var(--navy); }
+  .card h3 { margin:14px 0 4px; font-size:14px; color:var(--navy); }
+  .mut { color:var(--mut); font-size:12.5px; line-height:1.5; }
+  .note { font-size:12px; color:var(--mut); border-top:1px dashed var(--line); margin-top:10px; padding-top:8px; line-height:1.5; }
+  #map { height:560px; border-radius:8px; border:1px solid var(--line); }
+  .legend { display:flex; flex-wrap:wrap; gap:14px; font-size:12.5px; margin:8px 0 0; align-items:center; }
+  .dot { display:inline-block; width:11px; height:11px; border-radius:50%; margin-right:5px; vertical-align:-1px; }
+  .hollow { border:2px solid #111827; background:#fff; }
+  .tgl { font-size:12.5px; margin-left:14px; cursor:pointer; user-select:none; }
+  .split { display:grid; grid-template-columns:1fr 340px; gap:14px; }
+  @media (max-width:900px){ .split { grid-template-columns:1fr; } }
+  table.data { border-collapse:collapse; width:100%; font-size:13px; }
+  table.data th, table.data td { border-bottom:1px solid var(--line); padding:6px 8px; text-align:left; }
+  table.data th { color:var(--navy); font-size:12.5px; }
+  table.data td.num { text-align:right; font-variant-numeric:tabular-nums; }
+  .pill { font-size:11.5px; font-family:ui-monospace,Consolas,monospace; padding:1px 9px; border-radius:999px; background:#e5e7eb; color:#374151; white-space:nowrap; }
+  .pill.ok { background:#dcfce7; color:var(--ok); } .pill.bad { background:#fee2e2; color:var(--bad); }
+  .pill.grey { background:#f1f5f9; color:var(--mut); }
+  .kpi { display:grid; grid-template-columns:repeat(auto-fit,minmax(150px,1fr)); gap:10px; margin:10px 0; }
+  .kpi .k { background:#f1f5f9; border-radius:8px; padding:10px 12px; }
+  .kpi .v { font-size:20px; font-weight:bold; color:var(--navy); }
+  .kpi .l { font-size:11.5px; color:var(--mut); margin-top:2px; line-height:1.35; }
+  .sliderrow { display:grid; grid-template-columns:210px 1fr 64px; gap:10px; align-items:center; margin:8px 0; font-size:13.5px; }
+  @media (max-width:640px){
+    .sliderrow { grid-template-columns:1fr 64px !important; }
+    .sliderrow > div:first-child { grid-column:1 / -1; }
+  }
+  input[type=range] { width:100%; }
+  .sval { font-family:ui-monospace,Consolas,monospace; font-size:13px; text-align:right; }
+  .banner { background:#fffbeb; border:1px solid #f59e0b; border-radius:8px; padding:10px 14px; font-size:13px; line-height:1.55; margin-bottom:14px; }
+  .chartbox { position:relative; height:300px; }
+  .chartbox.tall { height:340px; }
+  canvas.spark { width:100%; }
+  .btn { background:var(--navy); color:#fff; border:0; border-radius:6px; padding:8px 18px; font-size:13.5px; cursor:pointer; font-family:inherit; }
+  .btn:disabled { background:#94a3b8; }
+  #portPanel h2 { margin-bottom:2px; }
+  footer { text-align:center; font-size:12px; color:var(--mut); padding:18px; }
+  a { color:var(--navy); }
+</style>
+</head>
+<body>
+<header>
+  <h1>Asia Green Corridors</h1>
+  <div class="sub">A zero-backend observatory for port &amp; shipping decarbonisation in Asia — satellite-AIS port activity
+  (IMF PortWatch), satellite-estimated shipping emissions (Climate TRACE), cyclone exposure (NOAA IBTrACS) and
+  disruption events, built for financiers, investors, insurers and policy makers. Everything below is computed in
+  your browser from live public feeds and bundled public data. Context: Ng (2026), <i>From Port to Platform</i>
+  (Middle East–Asia green marine fuel corridor).</div>
+  <nav>
+    <button data-tab="t1" class="active">1 · Port Map &amp; Screener</button>
+    <button data-tab="t2">2 · Corridor Watch &amp; Scenarios</button>
+    <button data-tab="t3">3 · Method, Data &amp; Honesty</button>
+  </nav>
+</header>
+<main>
+
+<!-- ============ TAB 1 ============ -->
+<section class="tab active" id="t1">
+  <div class="card">
+    <h2>The Asian port universe — 787 ports, measured from space</h2>
+    <div class="mut">Every circle represents a real port, with traffic derived from satellite-AIS signals from
+    ~120,000 vessels (IMF PortWatch, updated weekly). Size = annual vessel calls. Colour = dominant vessel type. Toggle
+    the emissions layer to overlay Climate TRACE's satellite-estimated port shipping emissions, or the typhoon layer to
+    show cyclone exposure since 2005. Click any port for its profile.</div>
+    <div class="legend">
+      <span><span class="dot" style="background:#1d4ed8"></span>container-dominant</span>
+      <span><span class="dot" style="background:#b45309"></span>tanker-dominant (fuel &amp; oil)</span>
+      <span><span class="dot" style="background:#0f766e"></span>dry-bulk-dominant</span>
+      <span><span class="dot" style="background:#6b7280"></span>mixed / other</span>
+      <span><span class="dot" style="background:#dc2626"></span>CT shipping emissions (toggle)</span>
+      <span class="tgl"><label><input type="checkbox" id="tglEm"> emissions layer</label></span>
+      <span class="tgl"><label><input type="checkbox" id="tglTy"> typhoon tracks 2005–2026</label></span>
+    </div>
+  </div>
+  <div class="split">
+    <div><div id="map"></div></div>
+    <div id="portPanel" class="card">
+      <h2>Port profile</h2>
+      <div class="mut">Click a port on the map. Live activity is fetched on selection from PortWatch's daily feed. If
+      your network blocks the feed, you will see a grey "unavailable" state rather than an estimated value.</div>
+      <div id="portBody" style="margin-top:8px"></div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ TAB 2 ============ -->
+<section class="tab" id="t2">
+  <div class="banner"><b>Featured corridor: Middle East → Asia green marine fuel corridor.</b>
+  The corridor analysed in Ng (2026), <i>From Port to Platform</i>, runs from Gulf production (Hormuz exit, Fujairah
+  midstream) through the Malacca Strait to Asian demand centres (Singapore, Hong Kong, Shanghai and Ulsan). Below, we
+  show the corridor's <b>measured</b> daily pulse, followed by a scenario sandbox illustrating what different
+  decarbonisation levers could mean against the IMO's 2030/2040 checkpoints.</div>
+
+  <div class="card">
+    <h2>Chokepoint pulse — daily transits, last 12 months <span class="pill grey" id="chokePill">loading…</span></h2>
+    <div class="mut">Malacca (Singapore approach), Hormuz (Gulf exit), Taiwan Strait (NE Asia). Satellite-AIS counts,
+    IMF PortWatch. Updated weekly; the most recent daily estimates may be revised.</div>
+    <div class="chartbox tall"><canvas id="chokeChart"></canvas></div>
+    <div class="note" id="chokeNote"></div>
+  </div>
+
+  <div class="card">
+    <h2>Corridor hubs, measured — extending the three-hub comparison</h2>
+    <div class="mut">Ng (2026) compares Fujairah, Singapore and Hong Kong qualitatively. Here, that comparison is
+    extended to six corridor hubs using measured annual vessel calls (PortWatch) and satellite-estimated shipping
+    emissions (Climate TRACE, 2025).</div>
+    <table class="data" id="hubTable"><thead><tr>
+      <th>Hub</th><th style="text-align:right">Vessel calls / yr</th><th style="text-align:right">Tanker share</th>
+      <th style="text-align:right">Shipping emissions (Mt CO₂e)</th><th style="text-align:right">Activity (M nmi)</th>
+      <th>Reading</th></tr></thead><tbody></tbody></table>
+    <div class="note">Tanker share is a proxy for fuel/oil handling intensity — AIS cannot see fuel type or cargo
+    content, so a tanker call is evidence of liquid-bulk activity, not of green-fuel trade. Green-capable vessels are
+    not separately identifiable in the public feeds used here; this is a data limitation, not a classification or
+    rounding choice.</div>
+  </div>
+
+  <div class="card">
+    <h2>Anomaly watch — corridor hubs, self-graded</h2>
+    <div class="mut">Two client-side detectors run on each hub's full multi-year daily series (bundled, harvested
+    2026-11-03): a <b>structural</b> detector (binary-segmented Pettitt changepoint, p&lt;0.05, ≥25% level shift) and a
+    <b>transient</b> detector (7-day mean below 60% of the trailing-90-day median for ≥3 days). Detections are matched
+    against PortWatch's documented disruption events (±14 days). Measured validation results across all 283
+    monitored ports are reported on Tab 3: 59.0% of documented disruptions caught at the adopted operating point,
+    with 1.41 alerts per port per year.</div>
+    <table class="data" id="anomTable"><thead><tr>
+      <th>Hub</th><th>Detector</th><th>Date / window</th><th style="text-align:right">Size</th>
+      <th>PortWatch documented-event match</th></tr></thead><tbody></tbody></table>
+    <div class="note" id="anomNote"></div>
+  </div>
+
+  <div class="card">
+    <h2>Scenario sandbox — what could the levers move?</h2>
+    <div class="mut">Select a scope, adjust the levers, and see the resulting modelled emissions path against the IMO
+    Revised Strategy checkpoints (2030: −20%, striving for −30%; 2040: −70%, striving for −80%; 2050: net zero; all
+    relative to 2008). <b>This is a
+    heuristic planning model, not a forecast</b> — assumptions are printed below and in Tab 3.</div>
+    <div class="sliderrow" style="grid-template-columns:210px 1fr;">
+      <div>Scope</div>
+      <div><select id="scopeSel" style="font-family:inherit;font-size:13.5px;padding:4px 6px;">
+        <option value="asia">All Asian international shipping (2,885 sources)</option>
+        <option value="corridor">Corridor hubs only (Fujairah, Singapore, HK, Shanghai, Ulsan)</option>
+        <option value="hk">Hong Kong only</option>
+      </select></div>
+    </div>
+    <div class="sliderrow"><div>Green-fuel share of energy by 2035</div>
+      <input type="range" id="sFuel" min="0" max="80" value="10"><div class="sval" id="vFuel">10%</div></div>
+    <div class="sliderrow"><div>Fleet adopting slow steaming (−10% speed)</div>
+      <input type="range" id="sSlow" min="0" max="100" value="30"><div class="sval" id="vSlow">30%</div></div>
+    <div class="sliderrow"><div>Port calls on shore power</div>
+      <input type="range" id="sShore" min="0" max="100" value="20"><div class="sval" id="vShore">20%</div></div>
+    <div class="kpi">
+      <div class="k"><div class="v" id="kBase">—</div><div class="l">Baseline emissions (Climate TRACE, 2025, measured)</div></div>
+      <div class="k"><div class="v" id="k2030">—</div><div class="l">Modelled 2030 emissions · IMO checkpoint: −20% / −30%</div></div>
+      <div class="k"><div class="v" id="k2040">—</div><div class="l">Modelled 2040 emissions · IMO checkpoint: −70% / −80%</div></div>
+      <div class="k"><div class="v" id="k2050">—</div><div class="l">Modelled 2050 emissions · IMO goal: net zero by or around 2050</div></div>
+    </div>
+    <div id="solverBox" style="background:#f8fafc;border:1px solid var(--line);border-radius:8px;padding:10px 12px;margin:2px 0 10px">
+      <b style="color:var(--navy)">Checkpoint solver — green-fuel share required for each IMO checkpoint</b>
+      <div class="mut" style="margin:4px 0 6px">At the current slow-steaming and shore-power settings, this shows the
+      terminal (2035) green-fuel share of energy required for the modelled path to reach each checkpoint — met in the
+      checkpoint year itself, or at the 2035 phase-in plateau. The deployed share at 2030 is half the terminal share
+      (f(2030) = 0.5). Because the levers are
+      proportional, these percentages are identical across scopes; only the absolute emissions amounts change.</div>
+      <table class="data"><thead><tr>
+        <th>IMO checkpoint</th><th>Terminal (2035) share — met in checkpoint year</th><th>Terminal (2035) share — met at 2035 plateau</th></tr></thead>
+        <tbody id="solverBody"></tbody></table>
+    </div>
+    <div class="chartbox"><canvas id="scenChart"></canvas></div>
+    <div class="note" id="scopeLine" style="border-top:0; margin-top:2px; padding-top:0"></div>
+    <div class="note">Assumptions (deliberately simple, stated for scrutiny): green-fuel share cuts emissions
+    one-for-one on a well-to-wake basis; 10% slower steaming cuts fuel per voyage ≈19% (speed–power cube law) on the
+    adopting share; shore power removes ≈4% of voyage emissions (auxiliary at berth) on covered calls; the modelled
+    reduction phases in linearly 2026–2035 and then holds — r(t) = f(t)·[1 − (1 − g)K], with f(t) = (t − 2025)/10
+    clamped to [0, 1] (so f(2030) = 0.5). Reductions are applied to the measured 2025 baseline, whereas the IMO checkpoints are
+    defined relative to 2008. We therefore overlay the IMO percentage bands on the 2025 baseline only as an
+    approximation. If 2025 Asian shipping emissions exceed their 2008 level, the reductions required against the true
+    IMO baseline would be greater than those shown here. Policy anchors: Hong Kong Action Plan targets
+    200,000 t green fuel/yr by 2030; Singapore targets &gt;1 Mt low-carbon methanol supply by 2030 (Ng 2026).</div>
+  </div>
+</section>
+
+<!-- ============ TAB 3 ============ -->
+<section class="tab" id="t3">
+  <div class="card">
+    <h2>What this is — and what it never claims</h2>
+    <div class="mut" style="font-size:13.5px">
+    <p><b>What it is.</b> A free, keyless, browser-only observatory that brings together four public datasets normally
+    viewed separately: satellite-AIS port activity (IMF PortWatch), satellite-estimated shipping emissions (Climate
+    TRACE), documented disruption events (PortWatch), and 80 years of typhoon tracks (NOAA IBTrACS). It allows
+    financiers, insurers and policy makers to screen any of 787 Asian ports in one click — a comparison that would
+    otherwise require paid terminals or substantial manual data assembly.</p>
+    <p><b>What it never claims.</b> (1) AIS activity cannot identify fuel type: tanker calls are used only as a proxy
+    for liquid-bulk intensity. (2) Emissions are Climate TRACE satellite estimates, not measured fuel sales. (3) The
+    scenario sandbox is a transparent heuristic, not a forecast; its assumptions are shown alongside the results.
+    (4) A quiet week in port calls does not, by itself, prove disruption: changes should be judged against each port's
+    own baseline, with "too few reports" treated as a valid result. (5) Nothing here constitutes investment, insurance
+    or policy advice.</p>
+    <p><b>Policy context.</b> The observatory was built as an empirical companion to Ng, K. W. P. (2026), <i>From Port
+    to Platform: Positioning Hong Kong as the Facilitator of the Middle East–Asia Green Marine Fuel Corridor</i>, Zenodo
+    (doi:10.5281/zenodo.21639017), whose limitations section notes that the corridor's quantitative evidence is
+    "thin by construction". This tool provides an open, measured data layer; the institutional thesis it helps
+    contextualise remains that of the working paper.</p></div>
+  </div>
+
+  <div class="card">
+    <h2>Live source status</h2>
+    <div class="mut">The status of every public feed used by the dashboard is checked directly from your browser.
+    Weekly updated sources carry their own "as of" dates.</div>
+    <p><button class="btn" id="pingBtn">Check feeds now</button></p>
+    <table class="data"><thead><tr><th>Source</th><th>Used for</th><th>Licence</th><th>Status</th></tr></thead>
+    <tbody id="feedBody"></tbody></table>
+  </div>
+
+  <div class="card">
+    <h2>Bundled data (harvested 2026-09-05; port series refreshed 2026-11-03, with attribution)</h2>
+    <table class="data"><thead><tr><th>Bundle</th><th>Contents</th><th style="text-align:right">Records</th></tr></thead>
+    <tbody>
+      <tr><td>ports_data.js</td><td>IMF PortWatch Asian port universe with vessel-mix</td><td class="num" id="cPorts">—</td></tr>
+      <tr><td>shipping_data.js</td><td>Climate TRACE v7 international-shipping sources, Asia (2025)</td><td class="num" id="cShip">—</td></tr>
+      <tr><td>disruptions_data.js</td><td>PortWatch disruption events 2018–2026 (validation ground truth)</td><td class="num" id="cDis">—</td></tr>
+      <tr><td>typhoons_data.js</td><td>NOAA IBTrACS WPAC cyclone tracks 2005–2026 (≥34 kt)</td><td class="num" id="cTy">—</td></tr>
+      <tr><td>hubseries_data.js</td><td>PortWatch daily port-call series 2019–2026, six corridor hubs (anomaly detector input)</td><td class="num" id="cHub">—</td></tr>
+    </tbody></table>
+  </div>
+
+  <div class="card">
+    <h2>Self-grading anomaly detector — measured results (M1.5)</h2>
+    <div class="mut"><b>Why this panel exists.</b> Tabs 1 and 2 draw conclusions from satellite ship-tracking data.
+    Rather than asking users to accept those conclusions on trust, we test the dashboard's alarm system against a set
+    of documented disruption events and publish the results — including where the method performs poorly. The
+    validation uses two public IMF PortWatch datasets: daily port traffic from 2019–2026 and a documented disruption
+    log from 2018–2026. It applies the same alarm logic used in Tab 2's "Anomaly watch" and is reproducible from
+    validation/results.json in the repository. This panel evaluates the detection method as a whole; its results do
+    not change when an individual port is selected.</div>
+    <table class="data"><thead><tr><th style="width:24%">How the test works</th><th>What we did — and where each number comes from</th></tr></thead><tbody>
+      <tr><td><b>I · The exam questions</b></td><td>The bundled file contains <b>132 disruption records</b>; <b>130 have
+      usable event dates</b> and cover cyclones, floods, earthquakes and conflicts. Of these, <b>83 are usable for
+      validation</b>: the remainder are excluded because the satellite traffic record begins in January 2019 and the
+      detector requires at least 60 days of "normal" traffic before an event to establish a baseline. We therefore do
+      not test events for which the underlying data are insufficient.</td></tr>
+      <tr><td><b>II · The alarm being tested</b></td><td>Two detectors monitor each port's weekly-average traffic. A
+      <b>structural</b> detector identifies persistent step-changes — a lasting increase or decrease of at least 25%.
+      A <b>transient</b> detector identifies sudden dips, where traffic falls below a specified proportion of the
+      port's own recent baseline for at least three days. Each row in the results table represents a different
+      sensitivity setting.</td></tr>
+      <tr><td><b>III · Marking the exam</b></td><td>An event is counted as <b>caught</b> if an alert is triggered at an
+      affected port within ±14 days of the documented event dates. At the adopted setting, the detector caught <b>49 of
+      83 events (59.0%)</b>, as shown in the "Disruptions caught" column.</td></tr>
+      <tr><td><b>IV · Measuring alert frequency and matches</b></td><td>Across the full observation period, the detector
+      generated <b>3,109 alerts</b> at the ports included in the validation exercise. Of these, <b>130 coincided with a
+      documented event</b>, equivalent to <b>4.2%</b> of all alerts. Because the disruption log is not exhaustive — for
+      example, COVID-19 congestion and the 2026 Gulf crisis are not catalogued as events — an unmatched alert is not
+      necessarily a false alarm. The 4.2% figure is an observed event-match rate: temporal proximity does not by itself
+      establish causation, and because the log is incomplete it cannot be read as an estimate of detection precision.<br><br>"Alerts per port per
+      year" standardises total alert volume across all <b>283 monitored ports</b> and the full observation period
+      (1 January 2019 – 23 October 2026, 7.81 years). At the adopted setting, the detector generated <b>3,125 alerts</b>
+      across these ports: 3,125 ÷ 283 ÷ 7.81 ≈ <b>1.41</b> alerts per port per year. (The 3,109 figure above counts only
+      alerts at event-affected ports, which are the alerts eligible for matching; the rate uses every monitored port,
+      including quiet ones with no nearby documented events.)</td></tr>
+    </tbody></table>
+    <table class="data"><thead><tr>
+      <th>Sensitivity setting (alert when traffic falls below … × only grade ports busier than …)</th>
+      <th style="text-align:right">Disruptions caught (of 83)</th>
+      <th style="text-align:right">Alerts per port per year</th>
+      <th style="text-align:right">Alerts matching a documented event (observed match rate)</th></tr></thead>
+      <tbody>
+      <tr><td>60% of normal × 1.0 call/day <b>(adopted)</b></td><td class="num"><b>59.0%</b> (49/83)</td><td class="num">1.41</td><td class="num">4.2%</td></tr>
+      <tr><td>60% of normal × 3.0 calls/day</td><td class="num">42.2% (35/83)</td><td class="num">0.65</td><td class="num">4.7%</td></tr>
+      <tr><td>50% of normal × 1.0 call/day</td><td class="num">43.4% (36/83)</td><td class="num">0.87</td><td class="num">4.2%</td></tr>
+      <tr><td>50% of normal × 3.0 calls/day, ≥4 days</td><td class="num">33.7% (28/83)</td><td class="num">0.50</td><td class="num">3.5%</td></tr>
+      <tr><td>70% of normal × 1.0 call/day</td><td class="num">68.7% (57/83)</td><td class="num">2.21</td><td class="num">4.0%</td></tr>
+      <tr><td>70% of normal × 0.5 calls/day, ≥2 days</td><td class="num">75.9% (63/83)</td><td class="num">4.11</td><td class="num">3.6%</td></tr>
+    </tbody></table>
+    <div class="note" style="border-top:0;margin-top:4px;padding-top:0">How to read a row: <b>"60% of normal × 1.0
+    call/day"</b> means — raise an alert when a port's 7-day average traffic falls below 60% of <i>its own</i> recent
+    normal (the trailing 90-day median) for at least 3 days; and only grade ports whose normal traffic is at least 1.0
+    call/day, because quieter ports are statistically too noisy to judge. All columns are defined in steps III–IV above.</div>
+    <div style="background:#f8fafc;border:1px solid var(--line);border-radius:8px;padding:10px 14px;margin:10px 0 0;font-size:13px;line-height:1.65">
+      <b style="color:var(--navy)">What this means for you — in plain English:</b><br>
+      <b>The alarm detects more than half of documented disruptions at the adopted setting.</b> It caught 49 of 83
+      documented events (59.0%). At the most sensitive setting tested, this rose to 63 of 83 (75.9%).<br>
+      <b>Greater sensitivity means more alerts.</b> Across the settings tested, the catch rate rises from 33.7% to
+      75.9%, while alert frequency increases from 0.50 to 4.11 alerts per port per year. The appropriate balance depends
+      on the user's purpose and tolerance for additional alerts; an insurer and a port operator may reasonably choose
+      different settings.<br>
+      <b>The adopted setting follows a declared rule.</b> We select the setting with the highest catch rate subject to
+      no more than two alerts per port per year. More sensitive settings are reported alongside it rather than
+      excluded.<br>
+      <b>The documented-event match rate is an observed minimum, not precision.</b> An alert without a matching
+      documented event is counted as unmatched, even though the event log is incomplete. Real disruptions that are
+      absent from the log — including COVID-19 congestion and the 2026 Gulf crisis — therefore reduce the reported
+      match rate, and a temporal match does not by itself prove the disruption caused the alert. For early-warning
+      screening, the more informative comparison is between disruptions caught and alerts per port per year, rather
+      than the match-rate column alone.<br>
+      <b>Detection varies by event type.</b> At the adopted setting, the detector caught 38 of 62 cyclones and 6 of 8
+      floods, compared with only 3 of 10 earthquakes. This is consistent with what the detector measures: disruption to
+      vessel activity rather than physical damage to port infrastructure.<br>
+      <b>The result is not driven by a single matching window.</b> Changing the permitted detection window from 7 to 14
+      to 21 days moves the catch rate from 51.8% to 62.7%, indicating that the overall finding is not highly sensitive
+      to this assumption.
+    </div>
+    <div class="note"><b>Caveats.</b> The event log is not exhaustive and a temporal match does not by itself
+    establish causation, so the documented-event match rate is an observed minimum rather than a measure of true
+    precision. The catch rates are in-sample: the operating-point rule is applied to the same events used for
+    grading. Quiet ports are difficult to assess reliably, so the validation abstains below one call per day.
+    AIS coverage also misses some small vessels.<br><br>
+    <b>For specialists.</b> The structural detector uses binary-segmented Pettitt changepoints (p&lt;0.05; minimum
+    segment 90 days; ≥25% level shift; ≤8 splits). The transient detector uses a seven-day trailing mean below the
+    specified fraction of the trailing 90-day median for at least three days, closing at ≥80% recovery. The matching
+    window is ±14 days around documented event dates. The operating point is selected using a declared rule: the
+    highest catch rate subject to ≤2 alerts per port-year. At the adopted setting, results by event type are:
+    cyclones 38/62; floods 6/8; earthquakes 3/10; other 2/2; volcano 0/1. The Asian subset records 30/54 events
+    caught (55.6%). Full event-level results are available in validation/results.json.</div>
+  </div>
+
+  <div class="card">
+    <h2>Intended use &amp; disclosure</h2>
+    <div class="mut" style="font-size:13.5px">This observatory is designed for decision-support screening by project
+    financiers, investors, insurers and policy makers. It is not a trading system, a compliance calculation, or a
+    substitute for verified IMO DCS or EU MRV data. The tool was developed with AI assistance (Kimi AI); all data
+    harvesting, modelling choices and text were reviewed by the author. It uses a zero-backend architecture: no
+    account is required, no user activity is tracked, and no data leave the browser other than direct requests to
+    the public sources identified above.</div>
+  </div>
+</section>
+</main>
+<footer>Asia Green Corridors · zero-backend · sources: IMF PortWatch · Climate TRACE (CC BY 4.0) · NOAA IBTrACS · Open-Meteo</footer>
+
+<script src="ports_data.js"></script>
+<script src="shipping_data.js"></script>
+<script src="disruptions_data.js"></script>
+<script src="typhoons_data.js"></script>
+<script src="hubseries_data.js"></script>
+<script>
+'use strict';
+
+/* ================= utilities ================= */
+var ARC = 'https://services9.arcgis.com/weJ1QsnbMYJlCHdG/arcgis/rest/services/';
+function jget(url, ms) {
+  return new Promise(function (resolve, reject) {
+    var to = setTimeout(function () { reject(new Error('timeout')); }, ms || 25000);
+    fetch(url).then(function (r) {
+      if (!r.ok) throw new Error('HTTP ' + r.status);
+      return r.json();
+    }).then(function (d) {
+      clearTimeout(to);
+      if (d && d.error) throw new Error(d.error.message || 'API error');
+      resolve(d);
+    }).catch(function (e) { clearTimeout(to); reject(e); });
+  });
+}
+function fmt(n, dp) {
+  if (n == null || isNaN(n)) return '—';
+  return Number(n).toLocaleString('en-GB', { maximumFractionDigits: dp == null ? 0 : dp });
+}
+function hav(a, b, c, d) {
+  var R = 6371, p = Math.PI / 180;
+  var h = Math.sin((c - a) * p / 2) * Math.sin((c - a) * p / 2) +
+          Math.cos(a * p) * Math.cos(c * p) * Math.sin((d - b) * p / 2) * Math.sin((d - b) * p / 2);
+  return 2 * R * Math.asin(Math.sqrt(h));
+}
+var charts = {};
+function mkChart(id, cfg) {
+  if (charts[id]) { charts[id].destroy(); }
+  charts[id] = new Chart(document.getElementById(id), cfg);
+}
+
+/* ================= tabs ================= */
+document.querySelectorAll('nav button').forEach(function (b) {
+  b.addEventListener('click', function () {
+    document.querySelectorAll('nav button').forEach(function (x) { x.classList.remove('active'); });
+    document.querySelectorAll('.tab').forEach(function (x) { x.classList.remove('active'); });
+    b.classList.add('active');
+    document.getElementById(b.dataset.tab).classList.add('active');
+    if (b.dataset.tab === 't1' && map) setTimeout(function () { map.invalidateSize(); }, 60);
+    if (b.dataset.tab === 't2') initCorridor();
+  });
+});
+
+/* ================= Tab 1: map ================= */
+document.getElementById('cPorts').textContent = fmt(window.PORTS.length);
+document.getElementById('cShip').textContent = fmt(window.SHIPPING.length);
+document.getElementById('cDis').textContent = fmt(window.DISRUPTIONS.length);
+document.getElementById('cTy').textContent = fmt(window.TYPHOONS.length);
+document.getElementById('cHub').textContent = Object.keys(window.HUBSERIES).length + ' ports';
+
+var map = null, emLayer = null, tyLayer = null;
+function portColour(p) {
+  var tot = p[6] || 1;
+  if (p[11] / tot >= 0.45) return '#b45309';       // tanker-dominant
+  if (p[7] / tot >= 0.45) return '#1d4ed8';        // container-dominant
+  if (p[8] / tot >= 0.45) return '#0f766e';        // dry-bulk-dominant
+  return '#6b7280';
+}
+function portRadius(p) { return 3 + 5 * Math.log10(1 + (p[6] || 0) / 1000); }
+
+function initMap() {
+  if (typeof L === 'undefined') {
+    document.getElementById('map').innerHTML =
+      '<div style="padding:40px;color:#64748b">Map library failed to load — check connection and reload. ' +
+      'The data tables on Tabs 2–3 do not depend on the map.</div>';
+    return;
+  }
+  map = L.map('map', { preferCanvas: true }).setView([20, 90], 4);  // spans Gulf (57°E) → Japan: the whole corridor
+  /* CARTO now watermarks keyless tiles ("API KEY REQUIRED", found in headless QA 2026-09-05).
+     Primary: Esri World Light Gray Canvas (keyless). Fallback: OSM standard tiles. */
+  var tiles = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Light_Gray_Base/MapServer/tile/{z}/{y}/{x}', {
+    attribution: 'Esri, HERE, Garmin, &copy; OpenStreetMap contributors', maxZoom: 12
+  }).addTo(map);
+  var failed = false;
+  tiles.on('tileerror', function () {
+    if (failed) return;
+    failed = true;
+    map.removeLayer(tiles);
+    L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
+      attribution: '&copy; OpenStreetMap contributors', maxZoom: 12
+    }).addTo(map);
+  });
+
+  var portsLayer = L.layerGroup();
+  window.PORTS.forEach(function (p) {
+    var m = L.circleMarker([p[4], p[5]], {
+      radius: portRadius(p), color: '#fff', weight: 1,
+      fillColor: portColour(p), fillOpacity: 0.82
+    });
+    m.on('click', function () { showPort(p); });
+    m.bindTooltip(p[1] + ', ' + p[3]);
+    portsLayer.addLayer(m);
+  });
+  portsLayer.addTo(map);
+
+  emLayer = L.layerGroup();
+  window.SHIPPING.forEach(function (s) {
+    var mt = s[5] / 1e6;
+    emLayer.addLayer(L.circleMarker([s[3], s[4]], {
+      radius: 2 + 3 * Math.log10(1 + mt * 3), color: '#dc2626', weight: 1,
+      fillColor: '#dc2626', fillOpacity: 0.35
+    }).bindTooltip(s[1] + ' — ' + fmt(mt, 2) + ' Mt CO₂e (' + s[8] + ')'));
+  });
+
+  tyLayer = L.layerGroup();
+  window.TYPHOONS.forEach(function (s) {
+    var pts = s[4].map(function (q) { return [q[0] / 10, q[1] / 10]; });
+    tyLayer.addLayer(L.polyline(pts, {
+      color: s[3] >= 96 ? '#7c3aed' : '#a78bfa',
+      weight: s[3] >= 96 ? 1.6 : 0.8, opacity: 0.45
+    }).bindTooltip(s[1] + ' (' + s[2] + ') — max ' + s[3] + ' kt'));
+  });
+
+  document.getElementById('tglEm').addEventListener('change', function () {
+    if (this.checked) { emLayer.addTo(map); } else { map.removeLayer(emLayer); }
+  });
+  document.getElementById('tglTy').addEventListener('change', function () {
+    if (this.checked) { tyLayer.addTo(map); } else { map.removeLayer(tyLayer); }
+  });
+}
+
+/* port profile + live activity */
+function nearestCT(lat, lon) {
+  var best = null, bd = 1e9;
+  window.SHIPPING.forEach(function (s) {
+    var d = hav(lat, lon, s[3], s[4]);
+    if (d < bd) { bd = d; best = s; }
+  });
+  return bd <= 10 ? { s: best, d: bd } : null;
+}
+function typhoonNear(lat, lon) {
+  var n = 0;
+  window.TYPHOONS.forEach(function (s) {
+    for (var i = 0; i < s[4].length; i++) {
+      if (hav(lat, lon, s[4][i][0] / 10, s[4][i][1] / 10) <= 300) { n++; break; }
+    }
+  });
+  return n;
+}
+function showPort(p) {
+  var body = document.getElementById('portBody');
+  var tot = p[6] || 0;
+  var ct = nearestCT(p[4], p[5]);
+  var ty = typhoonNear(p[4], p[5]);
+  var html = '<h2 style="font-size:15px">' + p[1] + ', ' + p[2] + '</h2>' +
+    '<table class="data"><tbody>' +
+    '<tr><td>Vessel calls / yr</td><td class="num">' + fmt(tot) + '</td></tr>' +
+    '<tr><td>· container / tanker / bulk</td><td class="num">' + fmt(p[7]) + ' / ' + fmt(p[11]) + ' / ' + fmt(p[8]) + '</td></tr>' +
+    '<tr><td>Tanker share (fuel-trade proxy)</td><td class="num">' + (tot ? Math.round(100 * p[11] / tot) : 0) + '%</td></tr>' +
+    '<tr><td>Top industry</td><td class="num">' + (p[12] || '—') + '</td></tr>' +
+    '<tr><td>Share of national maritime imports</td><td class="num">' + (p[13] ? p[13].toFixed(1) + '%' : '—') + '</td></tr>' +
+    '<tr><td>CT shipping emissions (2025)</td><td class="num">' +
+      (ct ? fmt(ct.s[5] / 1e6, 2) + ' Mt CO₂e' : '<span class="pill grey">no CT source ≤10 km</span>') + '</td></tr>' +
+    '<tr><td>Typhoons within 300 km since 2005</td><td class="num">' + ty + '</td></tr>' +
+    '</tbody></table>' +
+    '<h3>Daily vessel calls — last 120 days <span class="pill grey" id="livePill">fetching…</span></h3>' +
+    '<div class="chartbox" style="height:170px"><canvas id="portChart"></canvas></div>' +
+    '<div class="note">Live: IMF PortWatch daily port activity (AIS estimates, updated weekly). ' +
+    'Emissions: nearest Climate TRACE shipping source' + (ct ? ' (' + ct.s[1] + ', ' + ct.d.toFixed(1) + ' km)' : '') +
+    '. Cyclone exposure: NOAA IBTrACS tracks.</div>';
+  body.innerHTML = html;
+
+  var url = ARC + 'Daily_Ports_Data/FeatureServer/0/query?where=' +
+    encodeURIComponent("portid='" + p[0] + "'") +
+    '&outFields=date,portcalls,portcalls_tanker,portcalls_container&orderByFields=' +
+    encodeURIComponent('date DESC') + '&resultRecordCount=120&f=json';
+  jget(url).then(function (d) {
+    var rows = (d.features || []).map(function (f) { return f.attributes; }).reverse();
+    if (!rows.length) throw new Error('no rows');
+    document.getElementById('livePill').className = 'pill ok';
+    document.getElementById('livePill').textContent = 'live · as of ' + rows[rows.length - 1].date;
+    mkChart('portChart', {
+      type: 'line',
+      data: { labels: rows.map(function (r) { return r.date.slice(5); }),
+        datasets: [
+          { label: 'all calls', data: rows.map(function (r) { return r.portcalls; }),
+            borderColor: '#0b3b5e', borderWidth: 1.6, pointRadius: 0, tension: 0.2 },
+          { label: 'tanker', data: rows.map(function (r) { return r.portcalls_tanker; }),
+            borderColor: '#b45309', borderWidth: 1.2, pointRadius: 0, tension: 0.2 }
+        ] },
+      options: { responsive: true, maintainAspectRatio: false,
+        plugins: { legend: { labels: { boxWidth: 10, font: { size: 10 } } } },
+        scales: { x: { ticks: { maxTicksLimit: 8, font: { size: 10 } } },
+                  y: { beginAtZero: true, ticks: { font: { size: 10 } } } } }
+    });
+  }).catch(function (e) {
+    document.getElementById('livePill').className = 'pill bad';
+    document.getElementById('livePill').textContent = 'feed unavailable';
+    var c = document.getElementById('portChart');
+    if (c) c.parentElement.innerHTML =
+      '<div class="mut" style="padding:18px">Live feed unavailable from this network right now (' + e.message +
+      '). Bundled annual figures above remain valid.</div>';
+  });
+}
+
+/* ================= Tab 2: corridor ================= */
+var corridorDone = false;
+function initCorridor() {
+  if (corridorDone) return;
+  corridorDone = true;
+  buildHubTable();
+  buildScenario();
+  var since = new Date(Date.now() - 370 * 864e5).toISOString().slice(0, 10);
+  var url = ARC + 'Daily_Chokepoints_Data/FeatureServer/0/query?where=' +
+    encodeURIComponent("portid IN ('chokepoint5','chokepoint6','chokepoint11') AND date > DATE '" + since + "'") +
+    '&outFields=portid,date,n_total&orderByFields=' + encodeURIComponent('date DESC') +
+    '&resultRecordCount=1000&f=json';
+  jget(url, 30000).then(function (d) {
+    var rows = (d.features || []).map(function (f) { return f.attributes; });
+    if (!rows.length) throw new Error('no rows');
+    var names = { chokepoint5: 'Malacca', chokepoint6: 'Hormuz', chokepoint11: 'Taiwan' };
+    var colours = { chokepoint5: '#0b3b5e', chokepoint6: '#b45309', chokepoint11: '#0f766e' };
+    var byId = {};
+    rows.forEach(function (r) { (byId[r.portid] = byId[r.portid] || []).push(r); });
+    var dates = {};
+    rows.forEach(function (r) { dates[r.date] = 1; });
+    var axis = Object.keys(dates).sort();
+    var sets = Object.keys(byId).map(function (k) {
+      var m = {};
+      byId[k].forEach(function (r) { m[r.date] = r.n_total; });
+      var vals = axis.map(function (dt) { return m[dt] == null ? null : m[dt]; });
+      // 7-day trailing average for readability
+      var sm = vals.map(function (v, i) {
+        var s = 0, n = 0;
+        for (var j = Math.max(0, i - 6); j <= i; j++) { if (vals[j] != null) { s += vals[j]; n++; } }
+        return n ? s / n : null;
+      });
+      return { label: names[k] + ' (7-day avg)', data: sm, borderColor: colours[k],
+               borderWidth: 1.8, pointRadius: 0, tension: 0.25, spanGaps: true };
+    });
+    mkChart('chokeChart', { type: 'line',
+      data: { labels: axis.map(function (d2) { return d2.slice(2); }), datasets: sets },
+      options: { responsive: true, maintainAspectRatio: false, interaction: { mode: 'index', intersect: false },
+        plugins: { legend: { labels: { boxWidth: 12, font: { size: 11 } } } },
+        scales: { x: { ticks: { maxTicksLimit: 12, font: { size: 10 } } },
+                  y: { beginAtZero: true, title: { display: true, text: 'transits / day' } } } } });
+    var last = axis[axis.length - 1];
+    document.getElementById('chokePill').className = 'pill ok';
+    document.getElementById('chokePill').textContent = 'live · as of ' + last;
+    var latest = Object.keys(byId).map(function (k) {
+      var rs = byId[k]; return names[k] + ' ' + rs[0].n_total + '/day';
+    });
+    document.getElementById('chokeNote').textContent =
+      'Most recent settled day (' + last + '): ' + latest.join(' · ') +
+      '. Counts are satellite-AIS estimates; small vessels without AIS are not counted.';
+  }).catch(function (e) {
+    document.getElementById('chokePill').className = 'pill bad';
+    document.getElementById('chokePill').textContent = 'feed unavailable';
+    document.getElementById('chokeNote').textContent =
+      'Chokepoint feed unavailable from this network (' + e.message + '). The hub comparison below uses bundled data and remains valid.';
+  });
+}
+
+/* three-hub measured comparison */
+function ctFor(name) {
+  /* Shanghai and Fujairah are clusters in Climate TRACE (main source + satellite terminals,
+     verified 2026-09-05: 'Port Fujairah' 1.23 Mt vs bare 'Fujairah' 0.000 Mt placeholder).
+     Salalah has NO CT shipping source -> null = honest dash. */
+  if (name === 'Shanghai' || name === 'Fujairah') {
+    var hits = window.SHIPPING.filter(function (x) { return x[1].indexOf(name) !== -1; });
+    if (!hits.length) return null;
+    return { e: hits.reduce(function (a, s) { return a + s[5]; }, 0),
+             a: hits.reduce(function (a, s) { return a + s[6]; }, 0), n: hits.length };
+  }
+  var s = window.SHIPPING.filter(function (x) { return x[1] === name; })[0];
+  return s ? { e: s[5], a: s[6], n: 1 } : null;
+}
+var HUBS = ['Fujairah', 'Singapore', 'Hong Kong', 'Shanghai', 'Ulsan', 'Salalah'];
+function buildHubTable() {
+  var tb = document.querySelector('#hubTable tbody');
+  var notes = {
+    Fujairah: 'Incumbent midstream — 9 of 10 calls are tankers (Ng 2026: "capacity-led")',
+    Singapore: 'Full-stack incumbent — largest physical node in Asia',
+    'Hong Kong': 'Smaller physical node; institutional positioning (Ng 2026 thesis)',
+    Shanghai: 'Largest Mainland gateway; CT port-area cluster',
+    Ulsan: "Korea's designated green ship-fuel port",
+    Salalah: 'Omani green-ammonia base — not yet a CT shipping source (honest gap)'
+  };
+  HUBS.forEach(function (h) {
+    var p = window.PORTS.filter(function (x) { return x[1] === h; })[0];
+    var s = ctFor(h);
+    if (!p) return;
+    var share = p[6] ? Math.round(100 * p[11] / p[6]) : 0;
+    var tr = document.createElement('tr');
+    tr.innerHTML = '<td><b>' + h + '</b></td><td class="num">' + fmt(p[6]) + '</td>' +
+      '<td class="num">' + share + '%</td>' +
+      '<td class="num">' + (s ? fmt(s.e / 1e6, 2) : '—') + '</td>' +
+      '<td class="num">' + (s ? fmt(s.a / 1e6, 1) : '—') + '</td>' +
+      '<td style="font-size:12px;color:#64748b">' + notes[h] + '</td>';
+    tb.appendChild(tr);
+  });
+}
+
+/* ================= anomaly watch (M1.5) =================
+   Client-side replica of validation_harness.py at the adopted operating point.
+   S (structural): binary-segmented Pettitt, p<0.05, min segment 90d, max 8 splits, >=25% level shift.
+   T (transient): 7-day trailing mean < 60% of trailing-90d median (min baseline 1 call/day),
+   >=3 days, closes at >=80%, alerts <7d apart merged. */
+function trail7(vals) {
+  var out = [], run = 0, q = [];
+  for (var i = 0; i < vals.length; i++) {
+    q.push(vals[i]); run += vals[i];
+    if (q.length > 7) run -= q.shift();
+    out.push(run / q.length);
+  }
+  return out;
+}
+function median(a) {
+  if (!a.length) return 0;
+  var s = a.slice().sort(function (x, y) { return x - y; });
+  var m = s.length >> 1;
+  return s.length % 2 ? s[m] : (s[m - 1] + s[m]) / 2;
+}
+function rankAvg(x) {                       // average ranks, ties shared
+  var idx = x.map(function (v, i) { return [v, i]; }).sort(function (a, b) { return a[0] - b[0]; });
+  var r = new Array(x.length), i = 0;
+  while (i < idx.length) {
+    var j = i;
+    while (j + 1 < idx.length && idx[j + 1][0] === idx[i][0]) j++;
+    var avg = (i + j) / 2 + 1;
+    for (var k = i; k <= j; k++) r[idx[k][1]] = avg;
+    i = j + 1;
+  }
+  return r;
+}
+function pettitt(x) {
+  var n = x.length, r = rankAvg(x), U = 0, best = 0, bestK = 1;
+  for (var t = 0; t < n; t++) {
+    U += 2 * r[t] - (n + 1);
+    if (Math.abs(U) > best) { best = Math.abs(U); bestK = t + 1; }
+  }
+  var p = 2 * Math.exp(-6 * best * best / (n * n * n + n * n));
+  return { k: bestK, p: Math.min(p, 1) };
+}
+function detectS(dates, v7) {
+  var cps = [];
+  (function rec(lo, hi) {
+    if (cps.length >= 8 || hi - lo < 180) return;
+    var seg = v7.slice(lo, hi);
+    var r = pettitt(seg), g = lo + r.k;
+    if (r.p < 0.05 && g - lo >= 90 && hi - g >= 90) {
+      var before = median(v7.slice(Math.max(0, g - 90), g));
+      var after = median(v7.slice(g, Math.min(v7.length, g + 30)));
+      if (before > 0 && Math.abs(after - before) / before >= 0.25) {
+        cps.push({ i: g, pct: 100 * (after - before) / before });
+        rec(lo, g); rec(g, hi);
+      }
+    }
+  })(0, v7.length);
+  return cps.map(function (c) { return { date: dates[c.i], pct: c.pct }; });
+}
+function detectT(dates, raw) {
+  var v7 = trail7(raw), alerts = [], cur = null;
+  for (var i = 90; i < dates.length; i++) {
+    var base = median(v7.slice(i - 90, i));
+    if (base < 1) { if (cur) { alerts.push(cur); cur = null; } continue; }
+    var ratio = v7[i] / base;
+    if (ratio < 0.6) {
+      if (!cur) cur = { frm: dates[i], to: dates[i], depth: ratio };
+      else { cur.to = dates[i]; if (ratio < cur.depth) cur.depth = ratio; }
+    } else if (cur && ratio >= 0.8) { alerts.push(cur); cur = null; }
+  }
+  if (cur) alerts.push(cur);
+  return alerts.filter(function (a) {
+    return (Date.parse(a.to) - Date.parse(a.frm)) / 864e5 + 1 >= 3;
+  }).reduce(function (m, a) {
+    if (m.length && (Date.parse(a.frm) - Date.parse(m[m.length - 1].to)) / 864e5 < 7) {
+      var p = m[m.length - 1]; p.to = a.to; if (a.depth < p.depth) p.depth = a.depth;
+    } else m.push(a);
+    return m;
+  }, []);
+}
+function isoDays(ms, offsetDays) {
+  return new Date(ms + offsetDays * 864e5).toISOString().slice(0, 10);
+}
+function runAnomalyWatch() {
+  if (!window.HUBSERIES) return;
+  var HUB_IDS = { port362: 'Fujairah', port1201: 'Singapore', port474: 'Hong Kong',
+                  port1188: 'Shanghai', port1338: 'Ulsan', port746: 'Salalah' };
+  var ev = window.DISRUPTIONS.filter(function (e) { return e[5] && e[6]; }).map(function (e) {
+    return { name: e[2], frm: isoDays(e[5], -14), to: isoDays(e[6], 14),
+             ports: String(e[10]).split(/[;,]/).map(function (s) { return s.trim(); }) };
+  });
+  function matchEvent(pid, frm, to) {
+    for (var i = 0; i < ev.length; i++) {
+      if (ev[i].ports.indexOf(pid) === -1) continue;
+      if (frm <= ev[i].to && to >= ev[i].frm) return ev[i].name;
+    }
+    return null;
+  }
+  var cutoff = '2024-10-23', rows = [], totalS = 0, totalT = 0, lastDay = '';
+  Object.keys(HUB_IDS).forEach(function (pid) {
+    var rec = window.HUBSERIES[pid]; if (!rec) return;
+    var dates = rec.series.map(function (r) { return r[0]; });
+    var raw = rec.series.map(function (r) { return r[1]; });
+    if (dates[dates.length - 1] > lastDay) lastDay = dates[dates.length - 1];
+    detectS(dates, trail7(raw)).forEach(function (c) {
+      totalS++;
+      if (c.date >= cutoff) rows.push({ hub: HUB_IDS[pid], det: 'structural',
+        when: c.date, size: (c.pct > 0 ? '+' : '') + c.pct.toFixed(0) + '% level shift',
+        match: matchEvent(pid, c.date, c.date) });
+    });
+    detectT(dates, raw).forEach(function (a) {
+      totalT++;
+      if (a.to >= cutoff) rows.push({ hub: HUB_IDS[pid], det: 'transient',
+        when: a.frm + ' → ' + a.to, size: '−' + Math.round(100 * (1 - a.depth)) + '% deepest',
+        match: matchEvent(pid, a.frm, a.to) });
+    });
+  });
+  rows.sort(function (a, b) { return a.when < b.when ? 1 : -1; });
+  var tb = document.querySelector('#anomTable tbody');
+  tb.innerHTML = '';
+  rows.slice(0, 15).forEach(function (r) {
+    var tr = document.createElement('tr');
+    tr.innerHTML = '<td><b>' + r.hub + '</b></td><td>' + r.det + '</td><td>' + r.when + '</td>' +
+      '<td class="num">' + r.size + '</td><td>' +
+      (r.match ? '<b>' + r.match + '</b>' : '<span style="color:#64748b">No match in PortWatch DB</span>') + '</td>';
+    tb.appendChild(tr);
+  });
+  document.getElementById('anomNote').textContent =
+    rows.length ? 'Showing the ' + Math.min(15, rows.length) + ' most recent detections across the six hubs since ' + cutoff +
+    '. Across the full series since 2019, there are ' + totalS + ' structural changepoints and ' + totalT + ' transient alerts ' +
+    '(series as of ' + lastDay + '). An unmatched alert is not necessarily a false alarm — the ground-truth database ' +
+    'is not exhaustive; measured scores and caveats are on Tab 3.'
+    : 'No detections since ' + cutoff + ' at the adopted operating point — the corridor hubs are quiet. ' +
+    'Measured validation scores are on Tab 3.';
+}
+runAnomalyWatch();
+
+/* scenario sandbox */
+var CORRIDOR_CT = ['Fujairah', 'Singapore', 'Hong Kong', 'Shanghai', 'Ulsan'];  // Salalah: no CT source (disclosed)
+function scenBaseline() {
+  var scope = document.getElementById('scopeSel').value;
+  if (scope === 'asia') {
+    return { label: 'Asian international shipping', e: window.SHIPPING.reduce(function (a, s) { return a + s[5]; }, 0) / 1e6 };
+  }
+  if (scope === 'hk') {
+    var hk = ctFor('Hong Kong');
+    return { label: 'Hong Kong', e: hk ? hk.e / 1e6 : 0 };
+  }
+  var e = 0;
+  CORRIDOR_CT.forEach(function (n) { var s = ctFor(n); if (s) e += s.e; });
+  return { label: 'five corridor hubs (Salalah unmeasured)', e: e / 1e6 };
+}
+function buildScenario() {
+  ['sFuel', 'sSlow', 'sShore', 'scopeSel'].forEach(function (id) {
+    document.getElementById(id).addEventListener('input', runScenario);
+  });
+  runScenario();
+}
+function runScenario() {
+  var g = +document.getElementById('sFuel').value / 100;
+  var s = +document.getElementById('sSlow').value / 100;
+  var p = +document.getElementById('sShore').value / 100;
+  document.getElementById('vFuel').textContent = Math.round(g * 100) + '%';
+  document.getElementById('vSlow').textContent = Math.round(s * 100) + '%';
+  document.getElementById('vShore').textContent = Math.round(p * 100) + '%';
+  var R = 1 - (1 - g) * (1 - s * 0.19) * (1 - p * 0.04);   // full-phase-in reduction
+  var base = scenBaseline();
+  var years = [], model = [], chkMin = [], chkMax = [];
+  for (var y = 2025; y <= 2050; y++) {
+    years.push(y);
+    var ph = Math.min(1, Math.max(0, (y - 2025) / 10));    // linear phase-in 2026–2035
+    model.push(base.e * (1 - R * ph));
+    var red = y >= 2050 ? 1 : y >= 2040 ? 0.7 : y >= 2030 ? 0.2 : 0;
+    var red2 = y >= 2050 ? 1 : y >= 2040 ? 0.8 : y >= 2030 ? 0.3 : 0;
+    chkMin.push(base.e * (1 - red2));   // striving band (deeper cut)
+    chkMax.push(base.e * (1 - red));
+  }
+  var asiaTotal = window.SHIPPING.reduce(function (a, s2) { return a + s2[5]; }, 0) / 1e6;
+  document.getElementById('scopeLine').textContent =
+    'Why every scope has the same curve shape: the levers are percentage reductions, so only the baseline size changes. ' +
+    'This scope = ' + fmt(base.e, 1) + ' Mt (' + fmt(100 * base.e / asiaTotal, 1) + '% of all-Asian international shipping at ' +
+    fmt(asiaTotal, 1) + ' Mt). Compare the KPI numbers, not the curve shape.';
+  document.getElementById('kBase').textContent = fmt(base.e, 1) + ' Mt';
+  document.getElementById('k2030').textContent = fmt(model[5], 1) + ' Mt';
+  document.getElementById('k2040').textContent = fmt(model[15], 1) + ' Mt';
+  document.getElementById('k2050').textContent = fmt(model[25], 1) + ' Mt';
+  /* checkpoint solver: required green-fuel share g at current s, p — same model inverted */
+  var K = (1 - 0.19 * s) * (1 - 0.04 * p);
+  function reqG(r, ph) { return 1 - (1 - r / ph) / K; }   // r = target reduction; ph = phase-in fraction at deadline
+  function fmtG(g0) {
+    if (g0 <= 0) return 'already met';
+    if (g0 > 1) return 'unreachable — even 100% green fuel is insufficient at these Lever 2/3 settings';
+    return (g0 * 100).toFixed(1) + '%' + (g0 > 0.8 ? ' (beyond slider range 0–80%)' : '');
+  }
+  var srows = [
+    ['2030 minimum (−20%)', fmtG(reqG(0.2, 0.5)), fmtG(reqG(0.2, 1))],
+    ['2030 striving (−30%)', fmtG(reqG(0.3, 0.5)), fmtG(reqG(0.3, 1))],
+    ['2040 minimum (−70%)', fmtG(reqG(0.7, 1)), fmtG(reqG(0.7, 1))],
+    ['2040 striving (−80%)', fmtG(reqG(0.8, 1)), fmtG(reqG(0.8, 1))],
+    ['2050 net zero (by or around 2050)', fmtG(reqG(1, 1)), fmtG(reqG(1, 1))]
+  ];
+  document.getElementById('solverBody').innerHTML = srows.map(function (r) {
+    return '<tr><td>' + r[0] + '</td><td>' + r[1] + '</td><td><b>' + r[2] + '</b></td></tr>';
+  }).join('');
+  mkChart('scenChart', { type: 'line',
+    data: { labels: years, datasets: [
+      { label: 'modelled path (' + base.label + ')', data: model, borderColor: '#0b3b5e',
+        borderWidth: 2.2, pointRadius: 0, tension: 0.2 },
+      { label: 'IMO checkpoint (minimum)', data: chkMax, borderColor: '#b45309',
+        borderDash: [6, 5], borderWidth: 1.4, pointRadius: 0 },
+      { label: 'IMO checkpoint (striving)', data: chkMin, borderColor: '#15803d',
+        borderDash: [2, 4], borderWidth: 1.4, pointRadius: 0 }
+    ] },
+    options: { responsive: true, maintainAspectRatio: false,
+      plugins: { legend: { labels: { boxWidth: 12, font: { size: 11 } } } },
+      scales: { y: { beginAtZero: true, title: { display: true, text: 'Mt CO₂e / yr' } } } } });
+}
+
+/* ================= Tab 3: feed pings ================= */
+var FEEDS = [
+  ['IMF PortWatch — ports & activity', 'port universe, daily activity, chokepoints',
+   ARC + 'PortWatch_ports_database/FeatureServer/0/query?where=1%3D1&resultRecordCount=1&f=json', 'IMF open data (cite PortWatch)'],
+  ['IMF PortWatch — disruptions', 'validation ground truth',
+   ARC + 'portwatch_disruptions_database/FeatureServer/0/query?where=1%3D1&resultRecordCount=1&f=json', 'IMF open data'],
+  ['Climate TRACE v7', 'shipping emissions',
+   'https://api.climatetrace.org/v7/sources?sectors=transportation&limit=1', 'CC BY 4.0'],
+  ['Open-Meteo Marine', 'sea-state context',
+   'https://marine-api.open-meteo.com/v1/marine?latitude=1.26&longitude=104.3&hourly=wave_height&forecast_days=1', 'CC BY 4.0'],
+  ['NOAA IBTrACS', 'typhoon tracks (bundled)',
+   'https://www.ncei.noaa.gov/data/international-best-track-archive-for-climate-stewardship-ibtracs/v04r01/access/csv/ibtracs.WP.list.v04r01.csv', 'public domain']
+];
+document.getElementById('pingBtn').addEventListener('click', function () {
+  var btn = this; btn.disabled = true;
+  var tb = document.getElementById('feedBody');
+  tb.innerHTML = '';
+  var chain = Promise.resolve();
+  FEEDS.forEach(function (f) {
+    chain = chain.then(function () {
+      var tr = document.createElement('tr');
+      tr.innerHTML = '<td>' + f[0] + '</td><td style="font-size:12px;color:#64748b">' + f[1] +
+        '</td><td style="font-size:12px">' + f[3] + '</td><td><span class="pill grey">pinging…</span></td>';
+      tb.appendChild(tr);
+      var t0 = performance.now();
+      return fetch(f[2]).then(function (r) {
+        if (!r.ok) throw new Error('HTTP ' + r.status);
+        return r;
+      }).then(function () {
+        tr.lastElementChild.innerHTML = '<span class="pill ok">OK · ' +
+          Math.round(performance.now() - t0) + ' ms</span>';
+      }).catch(function (e) {
+        tr.lastElementChild.innerHTML = '<span class="pill bad">' + e.message + '</span>';
+      });
+    });
+  });
+  chain.then(function () { btn.disabled = false; });
+});
+
+/* ================= boot ================= */
+initMap();
+</script>
+</body>
+</html>
