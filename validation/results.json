@@ -1,0 +1,1043 @@
+{
+ "harvest_date": "2026-11-03",
+ "data_range": "2019-01-01..2026-10-23",
+ "detectors": {
+  "S_structural": "binary-segmented Pettitt p<0.05, min seg 90d, max 8 splits, effect size >=25% (30d-after vs 90d-before medians)",
+  "T_transient": "7-day trailing mean below drop x trailing-90d median (min baseline min_base calls/day) for >=min_days d, close at >=80%, merge gap <7d \u2014 operating point chosen by declared rule"
+ },
+ "operating_point_rule": "highest recall subject to <=2.0 alerts/port-year (tolerance 14d)",
+ "operating_point": "drop60_min3d_base1.0",
+ "match_rule": "changepoint date or alert-window intersection within event window +/- tol days",
+ "precision_caveat": "ground truth is not exhaustive (undocumented real shocks count as false positives) \u2014 precision/F1 are lower bounds",
+ "n_events_dated": 130,
+ "n_ports_with_series": 283,
+ "sensitivity_grid_tol14": {
+  "drop60_min3d_base1.0": {
+   "tolerance_days": 14,
+   "eligible_events": 83,
+   "events_detected": 49,
+   "recall": 0.59,
+   "detections_total": 3109,
+   "detections_matched": 130,
+   "precision_lower_bound": 0.042,
+   "f1_lower_bound": 0.078,
+   "alerts_per_port_year": 1.41,
+   "detections_all_ports": 3125,
+   "span_years": 7.8084,
+   "n_ports": 283,
+   "config": {
+    "drop": 0.6,
+    "min_days": 3,
+    "min_base": 1.0
+   }
+  },
+  "drop60_min3d_base3.0": {
+   "tolerance_days": 14,
+   "eligible_events": 83,
+   "events_detected": 35,
+   "recall": 0.422,
+   "detections_total": 1417,
+   "detections_matched": 66,
+   "precision_lower_bound": 0.047,
+   "f1_lower_bound": 0.084,
+   "alerts_per_port_year": 0.65,
+   "detections_all_ports": 1433,
+   "span_years": 7.8084,
+   "n_ports": 283,
+   "config": {
+    "drop": 0.6,
+    "min_days": 3,
+    "min_base": 3.0
+   }
+  },
+  "drop50_min3d_base1.0": {
+   "tolerance_days": 14,
+   "eligible_events": 83,
+   "events_detected": 36,
+   "recall": 0.434,
+   "detections_total": 1898,
+   "detections_matched": 80,
+   "precision_lower_bound": 0.042,
+   "f1_lower_bound": 0.077,
+   "alerts_per_port_year": 0.87,
+   "detections_all_ports": 1912,
+   "span_years": 7.8084,
+   "n_ports": 283,
+   "config": {
+    "drop": 0.5,
+    "min_days": 3,
+    "min_base": 1.0
+   }
+  },
+  "drop50_min4d_base3.0": {
+   "tolerance_days": 14,
+   "eligible_events": 83,
+   "events_detected": 28,
+   "recall": 0.337,
+   "detections_total": 1095,
+   "detections_matched": 38,
+   "precision_lower_bound": 0.035,
+   "f1_lower_bound": 0.063,
+   "alerts_per_port_year": 0.5,
+   "detections_all_ports": 1108,
+   "span_years": 7.8084,
+   "n_ports": 283,
+   "config": {
+    "drop": 0.5,
+    "min_days": 4,
+    "min_base": 3.0
+   }
+  },
+  "drop70_min3d_base1.0": {
+   "tolerance_days": 14,
+   "eligible_events": 83,
+   "events_detected": 57,
+   "recall": 0.687,
+   "detections_total": 4865,
+   "detections_matched": 195,
+   "precision_lower_bound": 0.04,
+   "f1_lower_bound": 0.076,
+   "alerts_per_port_year": 2.21,
+   "detections_all_ports": 4886,
+   "span_years": 7.8084,
+   "n_ports": 283,
+   "config": {
+    "drop": 0.7,
+    "min_days": 3,
+    "min_base": 1.0
+   }
+  },
+  "drop70_min2d_base0.5": {
+   "tolerance_days": 14,
+   "eligible_events": 83,
+   "events_detected": 63,
+   "recall": 0.759,
+   "detections_total": 9041,
+   "detections_matched": 325,
+   "precision_lower_bound": 0.036,
+   "f1_lower_bound": 0.069,
+   "alerts_per_port_year": 4.11,
+   "detections_all_ports": 9073,
+   "span_years": 7.8084,
+   "n_ports": 283,
+   "config": {
+    "drop": 0.7,
+    "min_days": 2,
+    "min_base": 0.5
+   }
+  }
+ },
+ "global": {
+  "tol7": {
+   "tolerance_days": 7,
+   "eligible_events": 83,
+   "events_detected": 43,
+   "recall": 0.518,
+   "detections_total": 3109,
+   "detections_matched": 106,
+   "precision_lower_bound": 0.034,
+   "f1_lower_bound": 0.064,
+   "alerts_per_port_year": 1.41,
+   "detections_all_ports": 3125,
+   "span_years": 7.8084,
+   "n_ports": 283
+  },
+  "tol14": {
+   "tolerance_days": 14,
+   "eligible_events": 83,
+   "events_detected": 49,
+   "recall": 0.59,
+   "detections_total": 3109,
+   "detections_matched": 130,
+   "precision_lower_bound": 0.042,
+   "f1_lower_bound": 0.078,
+   "alerts_per_port_year": 1.41,
+   "detections_all_ports": 3125,
+   "span_years": 7.8084,
+   "n_ports": 283
+  },
+  "tol21": {
+   "tolerance_days": 21,
+   "eligible_events": 83,
+   "events_detected": 52,
+   "recall": 0.627,
+   "detections_total": 3109,
+   "detections_matched": 160,
+   "precision_lower_bound": 0.051,
+   "f1_lower_bound": 0.095,
+   "alerts_per_port_year": 1.41,
+   "detections_all_ports": 3125,
+   "span_years": 7.8084,
+   "n_ports": 283
+  }
+ },
+ "by_type_tol14": {
+  "TC": {
+   "n": 62,
+   "S": 18,
+   "T": 34,
+   "either": 38
+  },
+  "FL": {
+   "n": 8,
+   "S": 1,
+   "T": 5,
+   "either": 6
+  },
+  "EQ": {
+   "n": 10,
+   "S": 1,
+   "T": 3,
+   "either": 3
+  },
+  "VO": {
+   "n": 1,
+   "S": 0,
+   "T": 0,
+   "either": 0
+  },
+  "OT": {
+   "n": 2,
+   "S": 0,
+   "T": 2,
+   "either": 2
+  }
+ },
+ "asia": {
+  "eligible_events": 54,
+  "events_detected": 30,
+  "recall": 0.556
+ },
+ "per_event": [
+  {
+   "name": "IDAI-19",
+   "type": "TC",
+   "level": "RED",
+   "from": "2019-03-09",
+   "to": "2019-03-15",
+   "n_ports": 1,
+   "detected_S": false,
+   "detected_T": false
+  },
+  {
+   "name": "Flood in Mozambique",
+   "type": "FL",
+   "level": "RED",
+   "from": "2019-03-09",
+   "to": "2019-03-29",
+   "n_ports": 3,
+   "detected_S": false,
+   "detected_T": false
+  },
+  {
+   "name": "KENNETH-19",
+   "type": "TC",
+   "level": "RED",
+   "from": "2019-04-23",
+   "to": "2019-04-25",
+   "n_ports": 2,
+   "detected_S": true,
+   "detected_T": false
+  },
+  {
+   "name": "FANI-19",
+   "type": "TC",
+   "level": "RED",
+   "from": "2019-04-27",
+   "to": "2019-05-03",
+   "n_ports": 2,
+   "detected_S": false,
+   "detected_T": false
+  },
+  {
+   "name": "Earthquake in Eastern New Guinea Reg., P.N.G.",
+   "type": "EQ",
+   "level": "RED",
+   "from": "2019-05-06",
+   "to": "2019-05-06",
+   "n_ports": 1,
+   "detected_S": false,
+   "detected_T": false
+  },
+  {
+   "name": "LEKIMA-19",
+   "type": "TC",
+   "level": "RED",
+   "from": "2019-08-04",
+   "to": "2019-08-11",
+   "n_ports": 18,
+   "detected_S": true,
+   "detected_T": true
+  },
+  {
+   "name": "Flood in British Virgin Islands, The Bahamas",
+   "type": "FL",
+   "level": "RED",
+   "from": "2019-08-28",
+   "to": "2019-08-28",
+   "n_ports": 6,
+   "detected_S": false,
+   "detected_T": true
+  },
+  {
+   "name": "LINGLING-19",
+   "type": "TC",
+   "level": "RED",
+   "from": "2019-09-02",
+   "to": "2019-09-07",
+   "n_ports": 6,
+   "detected_S": true,
+   "detected_T": true
+  },
+  {
+   "name": "MATMO-19/BULBUL-19",
+   "type": "TC",
+   "level": "RED",
+   "from": "2019-10-29",
+   "to": "2019-11-10",
+   "n_ports": 6,
+   "detected_S": true,
+   "detected_T": true
+  },
+  {
+   "name": "Flood in Bangladesh",
+   "type": "FL",
+   "level": "RED",
+   "from": "2019-11-09",
+   "to": "2019-11-12",
+   "n_ports": 8,
+   "detected_S": false,
+   "detected_T": true
+  },
+  {
+   "name": "KAMMURI-19",
+   "type": "TC",
+   "level": "RED",
+   "from": "2019-11-25",
+   "to": "2019-12-05",
+   "n_ports": 4,
+   "detected_S": true,
+   "detected_T": false
+  },
+  {
+   "name": "HAROLD-20",
+   "type": "TC",
+   "level": "RED",
+   "from": "2020-04-02",
+   "to": "2020-04-09",
+   "n_ports": 5,
+   "detected_S": true,
+   "detected_T": true
+  },
+  {
+   "name": "AMPHAN-20",
+   "type": "TC",
+   "level": "RED",
+   "from": "2020-05-16",
+   "to": "2020-05-20",
+   "n_ports": 4,
+   "detected_S": false,
+   "detected_T": true
+  },
+  {
+   "name": "NISARGA-20",
+   "type": "TC",
+   "level": "RED",
+   "from": "2020-06-02",
+   "to": "2020-06-03",
+   "n_ports": 2,
+   "detected_S": false,
+   "detected_T": false
+  },
+  {
+   "name": "BAVI-20",
+   "type": "TC",
+   "level": "RED",
+   "from": "2020-08-21",
+   "to": "2020-08-27",
+   "n_ports": 2,
+   "detected_S": false,
+   "detected_T": false
+  },
+  {
+   "name": "MAYSAK-20",
+   "type": "TC",
+   "level": "RED",
+   "from": "2020-08-28",
+   "to": "2020-09-02",
+   "n_ports": 8,
+   "detected_S": true,
+   "detected_T": true
+  },
+  {
+   "name": "HAISHEN-20",
+   "type": "TC",
+   "level": "RED",
+   "from": "2020-08-31",
+   "to": "2020-09-07",
+   "n_ports": 29,
+   "detected_S": true,
+   "detected_T": true
+  },
+  {
+   "name": "DELTA-20",
+   "type": "TC",
+   "level": "RED",
+   "from": "2020-10-04",
+   "to": "2020-10-10",
+   "n_ports": 3,
+   "detected_S": true,
+   "detected_T": true
+  },
+  {
+   "name": "MOLAVE-20",
+   "type": "TC",
+   "level": "RED",
+   "from": "2020-10-24",
+   "to": "2020-10-28",
+   "n_ports": 5,
+   "detected_S": true,
+   "detected_T": false
+  },
+  {
+   "name": "GONI-20",
+   "type": "TC",
+   "level": "RED",
+   "from": "2020-10-28",
+   "to": "2020-11-06",
+   "n_ports": 3,
+   "detected_S": false,
+   "detected_T": true
+  },
+  {
+   "name": "ETA-20",
+   "type": "TC",
+   "level": "RED",
+   "from": "2020-10-31",
+   "to": "2020-11-13",
+   "n_ports": 1,
+   "detected_S": false,
+   "detected_T": false
+  },
+  {
+   "name": "VAMCO-20",
+   "type": "TC",
+   "level": "RED",
+   "from": "2020-11-09",
+   "to": "2020-11-15",
+   "n_ports": 5,
+   "detected_S": true,
+   "detected_T": true
+  },
+  {
+   "name": "IOTA-20",
+   "type": "TC",
+   "level": "RED",
+   "from": "2020-11-13",
+   "to": "2020-11-18",
+   "n_ports": 1,
+   "detected_S": false,
+   "detected_T": false
+  },
+  {
+   "name": "YASA-20",
+   "type": "TC",
+   "level": "RED",
+   "from": "2020-12-12",
+   "to": "2020-12-20",
+   "n_ports": 4,
+   "detected_S": false,
+   "detected_T": false
+  },
+  {
+   "name": "NIRAN-21",
+   "type": "TC",
+   "level": "RED",
+   "from": "2021-03-01",
+   "to": "2021-03-07",
+   "n_ports": 7,
+   "detected_S": false,
+   "detected_T": false
+  },
+  {
+   "name": "TAUKTAE-21",
+   "type": "TC",
+   "level": "RED",
+   "from": "2021-05-14",
+   "to": "2021-05-17",
+   "n_ports": 6,
+   "detected_S": true,
+   "detected_T": true
+  },
+  {
+   "name": "YAAS-21",
+   "type": "TC",
+   "level": "RED",
+   "from": "2021-05-24",
+   "to": "2021-05-26",
+   "n_ports": 3,
+   "detected_S": false,
+   "detected_T": true
+  },
+  {
+   "name": "Flood in Bangladesh, India",
+   "type": "FL",
+   "level": "RED",
+   "from": "2021-05-24",
+   "to": "2021-05-31",
+   "n_ports": 8,
+   "detected_S": false,
+   "detected_T": true
+  },
+  {
+   "name": "GRACE-21",
+   "type": "TC",
+   "level": "RED",
+   "from": "2021-08-13",
+   "to": "2021-08-21",
+   "n_ports": 3,
+   "detected_S": true,
+   "detected_T": true
+  },
+  {
+   "name": "IDA-21",
+   "type": "TC",
+   "level": "RED",
+   "from": "2021-08-26",
+   "to": "2021-08-30",
+   "n_ports": 4,
+   "detected_S": false,
+   "detected_T": true
+  },
+  {
+   "name": "CHANTHU-21",
+   "type": "TC",
+   "level": "RED",
+   "from": "2021-09-06",
+   "to": "2021-09-18",
+   "n_ports": 3,
+   "detected_S": false,
+   "detected_T": false
+  },
+  {
+   "name": "RAI-21",
+   "type": "TC",
+   "level": "RED",
+   "from": "2021-12-13",
+   "to": "2021-12-20",
+   "n_ports": 9,
+   "detected_S": true,
+   "detected_T": true
+  },
+  {
+   "name": "Eruption  Hunga Tonga-Hunga Ha apai",
+   "type": "VO",
+   "level": "RED",
+   "from": "2021-12-20",
+   "to": "2022-01-18",
+   "n_ports": 1,
+   "detected_S": false,
+   "detected_T": false
+  },
+  {
+   "name": "Earthquake in Haiti",
+   "type": "EQ",
+   "level": "RED",
+   "from": "2022-01-24",
+   "to": "2022-01-24",
+   "n_ports": 2,
+   "detected_S": false,
+   "detected_T": false
+  },
+  {
+   "name": "BATSIRAI-22",
+   "type": "TC",
+   "level": "RED",
+   "from": "2022-01-27",
+   "to": "2022-02-08",
+   "n_ports": 2,
+   "detected_S": false,
+   "detected_T": true
+  },
+  {
+   "name": "EMNATI-22",
+   "type": "TC",
+   "level": "RED",
+   "from": "2022-02-16",
+   "to": "2022-02-24",
+   "n_ports": 3,
+   "detected_S": false,
+   "detected_T": true
+  },
+  {
+   "name": "Earthquake in Papua New Guinea",
+   "type": "EQ",
+   "level": "RED",
+   "from": "2022-09-10",
+   "to": "2022-09-10",
+   "n_ports": 1,
+   "detected_S": false,
+   "detected_T": true
+  },
+  {
+   "name": "Flood in China, Taiwan",
+   "type": "FL",
+   "level": "RED",
+   "from": "2022-09-14",
+   "to": "2022-09-16",
+   "n_ports": 6,
+   "detected_S": false,
+   "detected_T": true
+  },
+  {
+   "name": "FIONA-22",
+   "type": "TC",
+   "level": "RED",
+   "from": "2022-09-14",
+   "to": "2022-09-24",
+   "n_ports": 17,
+   "detected_S": false,
+   "detected_T": true
+  },
+  {
+   "name": "NORU-22",
+   "type": "TC",
+   "level": "RED",
+   "from": "2022-09-22",
+   "to": "2022-09-28",
+   "n_ports": 4,
+   "detected_S": true,
+   "detected_T": true
+  },
+  {
+   "name": "IAN-22",
+   "type": "TC",
+   "level": "RED",
+   "from": "2022-09-23",
+   "to": "2022-10-02",
+   "n_ports": 8,
+   "detected_S": true,
+   "detected_T": true
+  },
+  {
+   "name": "Flood in Nigeria",
+   "type": "FL",
+   "level": "RED",
+   "from": "2022-09-10",
+   "to": "2022-10-26",
+   "n_ports": 4,
+   "detected_S": true,
+   "detected_T": false
+  },
+  {
+   "name": "Earthquake in Indonesia",
+   "type": "EQ",
+   "level": "RED",
+   "from": "2022-11-21",
+   "to": "2022-11-21",
+   "n_ports": 2,
+   "detected_S": false,
+   "detected_T": false
+  },
+  {
+   "name": "Earthquake in T\u00fcrkiye",
+   "type": "EQ",
+   "level": "RED",
+   "from": "2023-02-06",
+   "to": "2023-02-06",
+   "n_ports": 4,
+   "detected_S": true,
+   "detected_T": true
+  },
+  {
+   "name": "JUDY-23",
+   "type": "TC",
+   "level": "RED",
+   "from": "2023-02-27",
+   "to": "2023-03-03",
+   "n_ports": 1,
+   "detected_S": false,
+   "detected_T": false
+  },
+  {
+   "name": "KEVIN-23",
+   "type": "TC",
+   "level": "RED",
+   "from": "2023-03-01",
+   "to": "2023-03-05",
+   "n_ports": 2,
+   "detected_S": false,
+   "detected_T": false
+  },
+  {
+   "name": "Earthquake in Ecuador",
+   "type": "EQ",
+   "level": "RED",
+   "from": "2023-03-18",
+   "to": "2023-03-18",
+   "n_ports": 2,
+   "detected_S": false,
+   "detected_T": false
+  },
+  {
+   "name": "MOCHA-23",
+   "type": "TC",
+   "level": "RED",
+   "from": "2023-05-11",
+   "to": "2023-05-14",
+   "n_ports": 1,
+   "detected_S": false,
+   "detected_T": false
+  },
+  {
+   "name": "MAWAR-23",
+   "type": "TC",
+   "level": "RED",
+   "from": "2023-05-20",
+   "to": "2023-06-03",
+   "n_ports": 2,
+   "detected_S": false,
+   "detected_T": false
+  },
+  {
+   "name": "DOKSURI-23",
+   "type": "TC",
+   "level": "RED",
+   "from": "2023-07-21",
+   "to": "2023-07-28",
+   "n_ports": 6,
+   "detected_S": false,
+   "detected_T": true
+  },
+  {
+   "name": "SAOLA-23",
+   "type": "TC",
+   "level": "RED",
+   "from": "2023-08-23",
+   "to": "2023-09-03",
+   "n_ports": 9,
+   "detected_S": false,
+   "detected_T": true
+  },
+  {
+   "name": "HAIKUI-23",
+   "type": "TC",
+   "level": "RED",
+   "from": "2023-08-28",
+   "to": "2023-09-04",
+   "n_ports": 4,
+   "detected_S": false,
+   "detected_T": false
+  },
+  {
+   "name": "LOLA-23",
+   "type": "TC",
+   "level": "RED",
+   "from": "2023-10-21",
+   "to": "2023-10-26",
+   "n_ports": 1,
+   "detected_S": false,
+   "detected_T": false
+  },
+  {
+   "name": "OTIS-23",
+   "type": "TC",
+   "level": "RED",
+   "from": "2023-10-22",
+   "to": "2023-10-25",
+   "n_ports": 1,
+   "detected_S": false,
+   "detected_T": false
+  },
+  {
+   "name": "HAMOON-23",
+   "type": "TC",
+   "level": "RED",
+   "from": "2023-10-23",
+   "to": "2023-10-24",
+   "n_ports": 1,
+   "detected_S": false,
+   "detected_T": false
+  },
+  {
+   "name": "NORMA-23",
+   "type": "TC",
+   "level": "RED",
+   "from": "2023-10-17",
+   "to": "2023-10-23",
+   "n_ports": 2,
+   "detected_S": false,
+   "detected_T": false
+  },
+  {
+   "name": "KOINU-23",
+   "type": "TC",
+   "level": "RED",
+   "from": "2023-09-29",
+   "to": "2023-10-10",
+   "n_ports": 5,
+   "detected_S": false,
+   "detected_T": false
+  },
+  {
+   "name": "COLLAPSE FRANCIS SCOTT KEY BRIDGE",
+   "type": "OT",
+   "level": "RED",
+   "from": "2024-03-26",
+   "to": "2024-06-12",
+   "n_ports": 1,
+   "detected_S": false,
+   "detected_T": true
+  },
+  {
+   "name": "BERYL-24",
+   "type": "TC",
+   "level": "RED",
+   "from": "2024-06-28",
+   "to": "2024-07-09",
+   "n_ports": 16,
+   "detected_S": false,
+   "detected_T": true
+  },
+  {
+   "name": "GAEMI-24",
+   "type": "TC",
+   "level": "RED",
+   "from": "2024-07-19",
+   "to": "2024-07-25",
+   "n_ports": 11,
+   "detected_S": false,
+   "detected_T": true
+  },
+  {
+   "name": "HELENE-24",
+   "type": "TC",
+   "level": "RED",
+   "from": "2024-09-23",
+   "to": "2024-09-27",
+   "n_ports": 2,
+   "detected_S": false,
+   "detected_T": false
+  },
+  {
+   "name": "YAGI-24",
+   "type": "TC",
+   "level": "RED",
+   "from": "2024-09-01",
+   "to": "2024-09-07",
+   "n_ports": 12,
+   "detected_S": false,
+   "detected_T": true
+  },
+  {
+   "name": "US PORTS STRIKE",
+   "type": "OT",
+   "level": "RED",
+   "from": "2024-10-01",
+   "to": "2024-10-02",
+   "n_ports": 17,
+   "detected_S": false,
+   "detected_T": true
+  },
+  {
+   "name": "MILTON-24",
+   "type": "TC",
+   "level": "RED",
+   "from": "2024-10-05",
+   "to": "2024-10-09",
+   "n_ports": 5,
+   "detected_S": false,
+   "detected_T": true
+  },
+  {
+   "name": "KONG-REY-24",
+   "type": "TC",
+   "level": "RED",
+   "from": "2024-10-25",
+   "to": "2024-11-01",
+   "n_ports": 17,
+   "detected_S": true,
+   "detected_T": true
+  },
+  {
+   "name": "Flood in India",
+   "type": "FL",
+   "level": "RED",
+   "from": "2024-10-20",
+   "to": "2024-10-26",
+   "n_ports": 4,
+   "detected_S": false,
+   "detected_T": true
+  },
+  {
+   "name": "DANA-24",
+   "type": "TC",
+   "level": "RED",
+   "from": "2024-10-23",
+   "to": "2024-10-25",
+   "n_ports": 2,
+   "detected_S": false,
+   "detected_T": false
+  },
+  {
+   "name": "JUDE-25",
+   "type": "TC",
+   "level": "RED",
+   "from": "2025-03-08",
+   "to": "2025-03-16",
+   "n_ports": 3,
+   "detected_S": false,
+   "detected_T": false
+  },
+  {
+   "name": "GARANCE-25",
+   "type": "TC",
+   "level": "RED",
+   "from": "2025-02-25",
+   "to": "2025-03-02",
+   "n_ports": 1,
+   "detected_S": false,
+   "detected_T": true
+  },
+  {
+   "name": "Earthquake in Vanuatu",
+   "type": "EQ",
+   "level": "RED",
+   "from": "2024-12-17",
+   "to": "2024-12-17",
+   "n_ports": 1,
+   "detected_S": false,
+   "detected_T": false
+  },
+  {
+   "name": "CHIDO-25",
+   "type": "TC",
+   "level": "RED",
+   "from": "2024-12-09",
+   "to": "2024-12-16",
+   "n_ports": 2,
+   "detected_S": true,
+   "detected_T": false
+  },
+  {
+   "name": "KAJIKI-25",
+   "type": "TC",
+   "level": "RED",
+   "from": "2025-08-22",
+   "to": "2025-08-25",
+   "n_ports": 3,
+   "detected_S": false,
+   "detected_T": false
+  },
+  {
+   "name": "BUALOI-25",
+   "type": "TC",
+   "level": "RED",
+   "from": "2025-09-23",
+   "to": "2025-09-28",
+   "n_ports": 3,
+   "detected_S": false,
+   "detected_T": false
+  },
+  {
+   "name": "Flood in China",
+   "type": "FL",
+   "level": "RED",
+   "from": "2025-09-23",
+   "to": "2025-09-25",
+   "n_ports": 1,
+   "detected_S": false,
+   "detected_T": false
+  },
+  {
+   "name": "RAGASA-25",
+   "type": "TC",
+   "level": "RED",
+   "from": "2025-09-18",
+   "to": "2025-09-24",
+   "n_ports": 20,
+   "detected_S": false,
+   "detected_T": true
+  },
+  {
+   "name": "MATMO-25",
+   "type": "TC",
+   "level": "RED",
+   "from": "2025-10-01",
+   "to": "2025-10-05",
+   "n_ports": 8,
+   "detected_S": false,
+   "detected_T": true
+  },
+  {
+   "name": "Earthquake in Philippines",
+   "type": "EQ",
+   "level": "ORANGE",
+   "from": "2025-09-30",
+   "to": "2025-09-30",
+   "n_ports": 3,
+   "detected_S": false,
+   "detected_T": false
+  },
+  {
+   "name": "MELISSA-25",
+   "type": "TC",
+   "level": "RED",
+   "from": "2025-10-21",
+   "to": "2025-10-31",
+   "n_ports": 17,
+   "detected_S": false,
+   "detected_T": true
+  },
+  {
+   "name": "KALMAEGI-25",
+   "type": "TC",
+   "level": "RED",
+   "from": "2025-11-01",
+   "to": "2025-11-06",
+   "n_ports": 7,
+   "detected_S": false,
+   "detected_T": true
+  },
+  {
+   "name": "FUNG-WONG-25",
+   "type": "TC",
+   "level": "RED",
+   "from": "2025-11-04",
+   "to": "2025-11-11",
+   "n_ports": 3,
+   "detected_S": false,
+   "detected_T": true
+  },
+  {
+   "name": "Earthquake in Venezuela",
+   "type": "EQ",
+   "level": "RED",
+   "from": "2026-06-24",
+   "to": "2026-06-24",
+   "n_ports": 4,
+   "detected_S": false,
+   "detected_T": true
+  },
+  {
+   "name": "BAVI-26",
+   "type": "TC",
+   "level": "RED",
+   "from": "2026-07-01",
+   "to": "2026-07-11",
+   "n_ports": 37,
+   "detected_S": false,
+   "detected_T": true
+  },
+  {
+   "name": "Earthquake in Indonesia",
+   "type": "EQ",
+   "level": "RED",
+   "from": "2026-08-14",
+   "to": "2026-08-14",
+   "n_ports": 1,
+   "detected_S": false,
+   "detected_T": false
+  }
+ ]
+}
